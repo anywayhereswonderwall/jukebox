@@ -1,7 +1,5 @@
 import mido
 from vocab import *
-from torch import LongTensor
-
 """
 Implementation of translators of MIDI files to and from the event-based
 vocabulary representation of MIDI files according to Oore et al., 2018
@@ -35,7 +33,7 @@ def midi_parser(midi_path):
 
             if t == "note_on" and msg.velocity > 0:  # key pressed
                 # +1 or-1 everywhere accounts for <pad> token
-                idx = msg.note + 1  # idx in vocab to help appending to output lists
+                idx = msg.note # idx in vocab to help appending to output lists
 
                 # get velocity to append after time events
                 vel = velocity_to_bin(msg.velocity)
@@ -50,7 +48,7 @@ def midi_parser(midi_path):
                     # to prevent adding more events to output lists, continue
                     continue
                 else:  # else get idx to append to output lists
-                    idx = note_on_events + note + 1
+                    idx = note_on_events + note
             # if pedal on or off and pedal_events is not empty
             elif t == "control_change":
                 if msg.control == 64:
@@ -67,7 +65,7 @@ def midi_parser(midi_path):
 
                         # perform note_offs that occurred when pedal was down now that pedal is up
                         for note in pedal_events:
-                            idx = note_on_events + note + 1
+                            idx = note_on_events + note
 
                             # append a note_off event for all times note was released
                             for i in range(pedal_events[note]):
@@ -87,14 +85,14 @@ def midi_parser(midi_path):
 
             # append velocity if note_on
             if t == "note_on" and msg.velocity > 0:
-                event_list.append(vocab[note_on_events + note_off_events + time_shift_events + vel + 1])
-                index_list.append(note_on_events + note_off_events + time_shift_events + vel + 1)
+                event_list.append(vocab[note_on_events + note_off_events + time_shift_events + vel])
+                index_list.append(note_on_events + note_off_events + time_shift_events + vel)
             # append event and idx note events
             event_list.append(vocab[idx])
             index_list.append(idx)
 
     # return the lists of events
-    return LongTensor(index_list), event_list
+    return index_list, event_list
 
 
 def list_parser(index_list=None, event_list=None, fname="bloop", tempo=512820):
@@ -174,11 +172,6 @@ def list_parser(index_list=None, event_list=None, fname="bloop", tempo=512820):
             idx = idx.item()
         except AttributeError:
             pass
-        # if pad token, continue
-        if idx <= 0:
-            continue
-        # adjust idx to ignore pad token
-        idx = idx - 1
 
         # note messages
         if 0 <= idx < note_on_events + note_off_events:
@@ -205,7 +198,7 @@ def list_parser(index_list=None, event_list=None, fname="bloop", tempo=512820):
         # time shift event
         elif note_on_events + note_off_events <= idx < note_on_events + note_off_events + time_shift_events:
             # find cut time in range (1, time_shift_events)
-            cut_time = idx - (note_on_events + note_off_events - 1)
+            cut_time = idx - (note_on_events + note_off_events)
             # scale cut_time by DIV (from vocabulary) to find time in ms; add to delta_time
             delta_time += cut_time * DIV
 

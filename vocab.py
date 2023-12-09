@@ -10,12 +10,10 @@ Possible MIDI events being considered:
 Total midi events = 413
 
 Indices in the vocabulary:
-v[       0] = '<pad>'
-v[  1..128] = note_on
-v[129..256] = note_off
-v[257..381] = time_shift
-v[382..413] = velocity
-v[414..415] = '<start>', '<end>'
+v[  0..127] = note_on
+v[128..255] = note_off
+v[256..380] = time_shift
+v[381..412] = velocity
 """
 
 """MANIFEST CONSTANTS"""
@@ -40,15 +38,8 @@ note_off_vocab = [f"note_off_{i}" for i in range(note_off_events)]
 time_shift_vocab = [f"time_shift_{i}" for i in range(time_shift_events)]
 velocity_vocab = [f"set_velocity_{i}" for i in range(velocity_events)]
 
-vocab = ['<pad>'] + note_on_vocab + note_off_vocab + time_shift_vocab + velocity_vocab + ['<start>', '<end>']
+vocab = note_on_vocab + note_off_vocab + time_shift_vocab + velocity_vocab
 vocab_size = len(vocab)
-
-# useful tokens
-pad_token = vocab.index("<pad>")
-start_token = vocab.index("<start>")
-end_token = vocab.index("<end>")
-
-
 """HELPER FUNCTIONS"""
 
 
@@ -172,3 +163,4 @@ def round_(a):
     decimal_digits = a % 1
     adder = 1 if decimal_digits >= 0.5 else 0
     return int(b + adder)
+
