@@ -8,4 +8,6 @@ To generate music:
 ```
 git clone https://github.com/anywayhereswonderwall/jukebox.git
 ```
-Use 
+It clones the repo with weights and code.
+
+Interact with the model using Jukebox.ipynb notebook.
